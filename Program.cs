@@ -3,7 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<IspitContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("IspitCS"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CaesarCipher"));
 });
 
 builder.Services.AddCors(options =>
