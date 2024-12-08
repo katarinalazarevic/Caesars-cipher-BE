@@ -10,4 +10,82 @@ public class IspitController : ControllerBase
     {
         Context = context;
     }
+
+    [Route("Encode")]
+    [HttpGet]
+    public async Task<ActionResult<string>> GetEncoded([FromQuery] string sentence, [FromQuery] int shift, [FromQuery] string language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+            return BadRequest("Potrebno je uneti jezik.");
+
+        var alphabet = await Context.Alphabets.FindAsync(language);
+        if (alphabet is null)
+            return BadRequest("Ne postoji specificirani jezik.");
+
+        var letters = alphabet.Letters.Replace(" ", "");
+
+        if (shift < 0 || shift > letters.Length - 1)
+            return BadRequest("Pomak mora ne moze biti manji od 0.");
+
+        if (shift > letters.Length - 1)
+            return BadRequest($"Pomak mora ne moze biti veci od {letters.Length - 1}.");
+
+        StringBuilder cipheredText = new StringBuilder();
+        foreach (char c in sentence)
+        {
+            if (char.IsLetter(c))
+            {
+                bool isUpper = char.IsUpper(c);
+                int letterIndex = letters.IndexOf(char.ToLower(c));
+                int newLetterIndex = (letterIndex + shift) % letters.Length;
+                char cipheredChar = letters[newLetterIndex];
+                cipheredText.Append(isUpper ? char.ToUpper(cipheredChar) : cipheredChar);
+            }
+            else
+            {
+                cipheredText.Append(c);
+            }
+        }
+
+        return cipheredText.ToString();
+    }
+
+    [Route("Decode")]
+    [HttpGet]
+    public async Task<ActionResult<string>> GetDecoded([FromQuery] string sentence, [FromQuery] int shift, [FromQuery] string language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+            return BadRequest("Potrebno je uneti jezik.");
+
+        var alphabet = await Context.Alphabets.FindAsync(language);
+        if (alphabet is null)
+            return BadRequest("Ne postoji specificirani jezik.");
+
+        var letters = alphabet.Letters.Replace(" ", "");
+
+        if (shift < 0 || shift > letters.Length - 1)
+            return BadRequest("Pomak mora ne moze biti manji od 0.");
+
+        if (shift > letters.Length - 1)
+            return BadRequest($"Pomak mora ne moze biti veci od {letters.Length - 1}.");
+
+        StringBuilder cipheredText = new StringBuilder();
+        foreach (char c in sentence)
+        {
+            if (char.IsLetter(c))
+            {
+                bool isUpper = char.IsUpper(c);
+                int letterIndex = letters.IndexOf(char.ToLower(c));
+                int newLetterIndex = (letterIndex + letters.Length - shift ) % letters.Length;
+                char cipheredChar = letters[newLetterIndex];
+                cipheredText.Append(isUpper ? char.ToUpper(cipheredChar) : cipheredChar);
+            }
+            else
+            {
+                cipheredText.Append(c);
+            }
+        }
+
+        return cipheredText.ToString();
+    }
 }
